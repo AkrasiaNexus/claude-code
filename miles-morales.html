@@ -268,6 +268,9 @@ body::before{
       <div>
         <div class="tag">No camera</div>
         <p id="errmsg">Your browser blocked the camera. Grant access in the address bar, then hit retry.</p>
+        <p id="errhelp" hidden style="margin-top:10px;color:var(--dim)">
+          Claude's artifact sandbox often disables camera access. To try this live: download the file and serve it from <code style="color:var(--cyan)">http://localhost</code>, or open it on any HTTPS host (GitHub Pages works).
+        </p>
         <button id="retry" type="button">Retry</button>
       </div>
     </div>
@@ -725,15 +728,20 @@ body::before{
       loop();
     } catch (e) {
       let msg = e.message || e.name;
-      if (e.name === 'NotAllowedError') msg = 'Camera permission was denied. Click the camera icon in your address bar to allow it, then hit retry.';
-      else if (e.name === 'NotFoundError') msg = 'No camera found on this device.';
+      let helpful = false;
+      if (e.name === 'NotAllowedError') {
+        msg = 'Camera access is blocked. If you clicked "block", allow it via the camera icon in the address bar. If you never saw a prompt, the page is running inside a sandbox that disables the camera.';
+        helpful = true;
+      } else if (e.name === 'NotFoundError') msg = 'No camera found on this device.';
       else if (e.name === 'NotReadableError') msg = 'Another app is using the camera. Close it and hit retry.';
-      showError(msg);
+      else if (/permission/i.test(msg) || /policy/i.test(msg)) helpful = true;
+      showError(msg, helpful);
     }
   }
 
-  function showError(msg) {
+  function showError(msg, showHelp) {
     errMsg.textContent = msg;
+    document.getElementById('errhelp').hidden = !showHelp;
     err.hidden = false;
     startBtn.disabled = false;
   }
