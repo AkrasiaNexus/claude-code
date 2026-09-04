@@ -1,0 +1,17 @@
+# never commit secrets or local state
+*.env
+.env*
+!.env.example
+*token*
+*secret*
+*credential*
+*.key
+*.pem
+settings.local.json
+history.jsonl
+sessions/
+projects/
+cache/
+metrics/
+cost-tracker.log
+bash-commands.log
